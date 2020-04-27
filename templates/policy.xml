@@ -1,0 +1,47 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{device-name}</name>
+      <config>
+        <policy xmlns="http://tail-f.com/ned/cisco-fmc">
+<?foreach {policy}?>
+<?if {type=access}?>
+          <accesspolicies>
+            <name>{name}</name>
+            <description>{description}</description>
+            <defaultAction>
+              <logBegin>false</logBegin>
+              <logEnd>false</logEnd>
+              <sendEventsToFMC>false</sendEventsToFMC>
+              <action>BLOCK</action>
+            </defaultAction>
+            <accessrules>
+              <name>{rule/name}</name>
+              <action>{action}</action>
+              <sendEventsToFMC>false</sendEventsToFMC>
+              <logFiles>false</logFiles>
+              <logBegin>false</logBegin>
+              <logEnd>false</logEnd>
+              <variableSet>
+                <name>Default-Set</name>
+              </variableSet>
+              <sourceZones>
+                <objects>
+                  <name>source-zone</name>
+                </objects>
+              </sourceZones>
+              <destinationZones>
+                <objects>
+                  <name>destination-zone</name>
+                </objects>
+              </destinationZones>
+              <enabled>true</enabled>
+            </accessrules>
+          </accesspolicies>
+<?end?>
+<?end?>
+        </policy>
+      </config>
+    </device>
+  </devices>
+</config>

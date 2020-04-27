@@ -1,0 +1,104 @@
+module configure-cisco-ftd {
+
+  namespace "http://example.com/configure-cisco-ftd";
+  prefix configure-cisco-ftd;
+
+  import ietf-inet-types { prefix inet; }
+  import tailf-common { prefix tailf; }
+  import tailf-ncs { prefix ncs; }
+
+  description
+    "Bla bla...";
+
+  revision 2020-04-23 {
+    description
+      "Initial revision.";
+  }
+  
+  container service-templates {
+    list ftd {
+      config "false";
+      key name;
+      leaf name {
+        type string;
+      }
+      list variable {
+        key name;
+        leaf name {
+          type string;
+        }
+      }
+    } 
+  }
+
+  list configure-cisco-ftd {
+    description "Configure and FTD device";
+    key device;
+    uses ncs:service-data;
+    ncs:servicepoint configure-cisco-ftd-servicepoint;
+
+    leaf device {
+      type string;
+      tailf:non-strict-leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+    }
+    
+    list policy {
+      key name;
+      leaf name {
+        type string;
+      }
+      leaf description {
+        type string;
+      }
+      leaf type {
+        type enumeration {
+          enum "access";
+        }
+        default "access";
+      }
+      list rule {
+        key name;
+        leaf name {
+          type string;
+        }
+        leaf action {
+          type enumeration {
+            enum "BLOCK";
+            enum "ALLOW";
+          }
+          default "BLOCK";
+        }
+        leaf-list source-zone {
+          type string;
+        }
+        leaf-list destination-zone {
+          type string;
+        }
+      }
+    }
+
+    list template {
+      key name;
+      leaf name {
+        type leafref {
+          path "/ncs:devices/ncs:template/ncs:name";
+        }
+      }
+      list variable {
+        key name;
+        leaf name {
+          type string;
+          tailf:non-strict-leafref {
+            path "/service-templates/ftd/name";
+          }
+        }
+        leaf value {
+          type string;
+        }
+      }
+    }
+
+  }
+}
