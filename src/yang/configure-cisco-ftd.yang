@@ -6,6 +6,7 @@ module configure-cisco-ftd {
   import ietf-inet-types { prefix inet; }
   import tailf-common { prefix tailf; }
   import tailf-ncs { prefix ncs; }
+  import tailf-ned-cisco-fmc { prefix cisco-fmc; }
 
   description
     "Bla bla...";
@@ -30,6 +31,28 @@ module configure-cisco-ftd {
       }
     } 
   }
+  
+  grouping action-grouping {
+    leaf logBegin {
+      type boolean;
+      default "false";
+    }
+    leaf logEnd {
+      type boolean;
+      default "false";
+    }
+    leaf sendEventsToFMC {
+      type boolean;
+      default "false";
+    }
+    leaf action {
+      type enumeration {
+        enum "BLOCK";
+        enum "ALLOW";
+      }
+      default "BLOCK";
+    }
+  }
 
   list configure-cisco-ftd {
     description "Configure and FTD device";
@@ -38,8 +61,8 @@ module configure-cisco-ftd {
     ncs:servicepoint configure-cisco-ftd-servicepoint;
 
     leaf device {
-      type string;
-      tailf:non-strict-leafref {
+      description "FMC Device";
+      type leafref {
         path "/ncs:devices/ncs:device/ncs:name";
       }
     }
@@ -55,28 +78,149 @@ module configure-cisco-ftd {
       leaf type {
         type enumeration {
           enum "access";
+          enum "nat";
         }
         default "access";
       }
+      container defaultAction {
+        when "../type = 'access'";
+        uses action-grouping;
+      }
+
       list rule {
         key name;
         leaf name {
           type string;
         }
-        leaf action {
-          type enumeration {
-            enum "BLOCK";
-            enum "ALLOW";
-          }
-          default "BLOCK";
+        leaf index {
+          type uint32;
+          must "not(.)";
+        }
+        uses action-grouping {
+          when "../type = 'access'";
         }
         leaf-list source-zone {
-          type string;
+          when "../../type = 'access'";
+          type leafref {
+            path "deref(../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:securityzones/cisco-fmc:name";
+          }
         }
         leaf-list destination-zone {
+          when "../../type = 'access'";
           type string;
         }
-      }
+        leaf type {
+          when "../../type = 'nat'";
+          type enumeration {
+            enum "auto";
+            enum "before-manual";
+	    enum "after-manual";
+          }
+        }
+        leaf nat-type {
+          when "../../type = 'nat'";
+          type enumeration {
+            enum "STATIC";
+            enum "DYNAMIC";
+          }
+        }
+        leaf interfaceIpv6 {
+          when "../../type = 'nat'";
+          type boolean;
+          default "false";
+        }
+        leaf fallThrough {
+          when "../../type = 'nat'";
+          type boolean;
+          default "false";
+        }
+        leaf dns {
+          when "../../type = 'nat'";
+          type boolean;
+          default "false";
+        }
+        leaf routeLookup {
+          when "../../type = 'nat'";
+          type boolean;
+          default "false";
+        }
+        leaf noProxyArp {
+          when "../../type = 'nat'";
+          type boolean;
+          default "false";
+        }
+        leaf netToNet {
+          when "../../type = 'nat'";
+          type boolean;
+          default "false";
+        }
+        leaf sourceInterface {
+          type string;
+          when "../../type = 'nat'";
+        }
+        leaf destinationInterface {
+          type string;
+          when "../../type = 'nat'";
+        }
+        container source {
+          when "../../type = 'nat'  and (../type = 'before-manual' or ../type = 'after-manual')";
+          leaf originalSource {
+            type leafref {
+              path "deref(../../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
+            }
+          }
+          leaf translatedSource {
+            type leafref {
+              path "deref(../../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
+            }
+          }
+          leaf interfaceIn {
+            type boolean;
+            default "false";
+          }
+        }
+        leaf unidirectional {
+          when "../../type = 'nat' 
+               and (../type = 'before-manual' 
+                    or ../type = 'after-manual')";
+          type boolean;
+          default "false";
+        }
+        leaf interfaceInOriginalDestination {
+          when "../../type = 'nat' 
+               and (../type = 'before-manual' 
+                    or ../type = 'after-manual')";
+          type boolean;
+          default "false";
+        }
+        leaf enabled {
+          when "../../type = 'nat' 
+               and (../type = 'before-manual' 
+                    or ../type = 'after-manual')";
+          type boolean;
+          default "true";
+        }
+        leaf interfaceInTranslatedNetwork {
+          when "../../type = 'nat' 
+               and ../type = 'auto'"; 
+          type boolean;
+          default "false";
+        }
+        leaf originalNetwork {
+          type leafref {
+            path "deref(../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
+          }
+          when "../../type = 'nat' 
+               and ../type = 'auto'"; 
+        }
+        leaf translatedNetwork {
+          type leafref {
+            path "deref(../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
+          }
+          when "../../type = 'nat' 
+               and ../type = 'auto'"; 
+        }
+      } 
     }
 
     list template {

@@ -5,7 +5,7 @@
       <config>
         <policy xmlns="http://tail-f.com/ned/cisco-fmc">
 <?foreach {policy}?>
-<?if {type=access}?>
+<?if {type='access'}?>
           <accesspolicies>
             <name>{name}</name>
             <description>{description}</description>
@@ -38,6 +38,93 @@
               <enabled>true</enabled>
             </accessrules>
           </accesspolicies>
+<?end?>
+<?if {type='nat'}?>
+          <ftdnatpolicies>
+            <name>{name}</name>
+            <description>{description}</description>
+            <before-manualnatrules>
+              <index>1</index>
+              <originalSource>
+                <name>BOA-Medium-Large-IPv4-Servers</name>
+                <overridable>false</overridable>
+              </originalSource>
+              <translatedSource>
+                <name>IPv4-Link-Local</name>
+                <overridable>false</overridable>
+              </translatedSource>
+              <unidirectional>false</unidirectional>
+              <interfaceInOriginalDestination>false</interfaceInOriginalDestination>
+              <interfaceInTranslatedSource>false</interfaceInTranslatedSource>
+              <enabled>true</enabled>
+              <natType>STATIC</natType>
+              <interfaceIpv6>false</interfaceIpv6>
+              <fallThrough>false</fallThrough>
+              <dns>false</dns>
+              <routeLookup>false</routeLookup>
+              <noProxyArp>false</noProxyArp>
+              <netToNet>false</netToNet>
+              <sourceInterface>
+                <name>BOA-Trusted</name>
+              </sourceInterface>
+              <destinationInterface>
+                <name>BOA-Untrusted</name>
+              </destinationInterface>
+            </before-manualnatrules>
+            <after-manualnatrules>
+              <index>2</index>
+              <originalSource>
+                <name>IPv4-Multicast</name>
+                <overridable>false</overridable>
+              </originalSource>
+              <translatedSource>
+              <name>IPv4-Link-Local</name>
+                <overridable>false</overridable>
+                </translatedSource>
+              <unidirectional>false</unidirectional>
+              <interfaceInOriginalDestination>false</interfaceInOriginalDestination>
+              <interfaceInTranslatedSource>false</interfaceInTranslatedSource>
+              <enabled>true</enabled>
+              <natType>STATIC</natType>
+              <interfaceIpv6>false</interfaceIpv6>
+              <fallThrough>false</fallThrough>
+              <dns>false</dns>
+              <routeLookup>false</routeLookup>
+              <noProxyArp>false</noProxyArp>
+              <netToNet>false</netToNet>
+              <sourceInterface>
+                <name>BOA-Trusted</name>
+              </sourceInterface>
+              <destinationInterface>
+                <name>BOA-Untrusted</name>
+              </destinationInterface>
+            </after-manualnatrules>
+            <autonatrules>
+              <index>0</index>
+              <interfaceInTranslatedNetwork>false</interfaceInTranslatedNetwork>
+              <originalNetwork>
+                <name>IPv4-Multicast</name>
+              </originalNetwork>
+              <translatedNetwork>
+                <name>BOA-Small-IPv4-Clients</name>
+              </translatedNetwork>
+              <dns>false</dns>
+              <routeLookup>false</routeLookup>
+              <noProxyArp>false</noProxyArp>
+              <netToNet>false</netToNet>
+              <fallThrough>false</fallThrough>
+              <natType>DYNAMIC</natType>
+              <interfaceIpv6>false</interfaceIpv6>
+              <sourceInterface>
+                <name>BOA-Trusted</name>
+              </sourceInterface>
+              <destinationInterface>
+                <name>BOA-Untrusted</name>
+              </destinationInterface>
+              <originalPort>0</originalPort>
+              <translatedPort>10</translatedPort>
+            </autonatrules>
+          </ftdnatpolicies>
 <?end?>
 <?end?>
         </policy>
