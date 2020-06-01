@@ -15,15 +15,28 @@ FXS = $(SRC:yang/%.yang=../load-dir/%.fxs)
 YANGPATH += /home/atcadmin/neds/cisco-fmc-gen-1.3/src/ncsc-out/modules/yang
 NCSCPATH   = $(YANGPATH:%=--yangpath %)
 YANGERPATH = $(YANGPATH:%=--path %)
+PYTHONSRC = $(wildcard ../python/configure_cisco_ftd/*.py)
+PYTHONBUILD = $(wildcard ../python/configure_cisco_ftd/*.pyc)
+TEMPLATESRC = $(wildcard loaddata/*.xml)
 
-fxs: $(DIRS) $(FXS)
+fxs: $(PYTHONSRC) $(PYTHONBUILD) $(DIRS) $(FXS) $(TEMPLATESRC)
+
+$(PYTHONSRC): .FORCE
+	python -m py_compile $@
+.PHONY: .FORCE
+$(PYTHONBUILD): .FORCE2
+	rm -f $@
+.PHONY: .FORCE2
 
 $(DIRS):
 	mkdir -p $@
 
 ../load-dir/%.fxs: yang/%.yang
 	$(NCSC)  `ls $*-ann.yang  > /dev/null 2>&1 && echo "-a $*-ann.yang"` \
-             $(NCSCPATH) -c -o $@ $<
+		$(NCSCPATH) -c -o $@ $<
+
+$(TEMPLATESRC): .FORCE
+	cp $@ ../load-dir
 
 clean:
 	rm -rf $(DIRS)

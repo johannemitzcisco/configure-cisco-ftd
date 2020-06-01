@@ -1,0 +1,40 @@
+<config>
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{device}</name>
+      <config>
+        <devices xmlns="http://tail-f.com/ned/cisco-fmc">
+          <devicerecords>
+            <name>{ftd-device/name}</name>
+            <physicalinterfaces>
+	      <ifname>{interfaces/interface/name}</ifname>
+	      <name>{interface}</name>
+              <ipv4>
+                <static>
+		  <address>{address}</address>
+		  <netmask>{netmask}</netmask>
+                </static>
+              </ipv4>
+            </physicalinterfaces>
+            <routing>
+              <ipv4staticroutes>
+                <interfaceName>{interfaces/interface/name}</interfaceName>
+                <gateway>
+                  <object>
+		    <name>{routing/static/gateway}</name>
+                  </object>
+                </gateway>
+                <selectedNetworks>
+                  <name>{routing/static/network}</name>
+                </selectedNetworks>
+                <type>IPv4StaticRoute</type>
+                <metricValue>{routing/static/metricValue}</metricValue>
+                <isTunneled>{routing/static/isTunneled}</isTunneled>
+              </ipv4staticroutes>
+            </routing>
+          </devicerecords>
+        </devices>
+      </config>
+    </device>
+  </devices>
+</config>

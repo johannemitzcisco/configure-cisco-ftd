@@ -18,23 +18,23 @@ class ServiceCallbacks(Service):
         template = ncs.template.Template(service)
         template.apply('policy', vars)
    
-        for template in service.template:
-            input = root.devices.device[service.device].apply_template.get_input()
-            input.template_name = template.name
-            for variable in template.variable:
-              var = input.variable.create(variable.name)
-              var.value = variable.value
-            root.devices.device[service.device].apply_template(input)
+#        for template in service.template:
+#            input = root.devices.device[service.device].apply_template.get_input()
+#            input.template_name = template.name
+#            for variable in template.variable:
+#              var = input.variable.create(variable.name)
+#              var.value = variable.value
+#            root.devices.device[service.device].apply_template(input)
 
             # Save template and it's variable names for later use
-            if template.name in root.service_templates.ftd:
-               saved_template = root.service_templates.ftd[template.name]
-            else:
-               saved_template = root.service_templates.ftd.create(template.name)
-               del saved_template.variable
-            for variable in template.variable
-              var = save_template.variable.create(variable.name)
-              var.value = variable.value
+ #           if template.name in root.service_templates.ftd:
+#               saved_template = root.service_templates.ftd[template.name]
+#            else:
+#               saved_template = root.service_templates.ftd.create(template.name)
+#               del saved_template.variable
+#            for variable in template.variable:
+#              var = save_template.variable.create(variable.name)
+#              var.value = variable.value
          
 
 
@@ -44,7 +44,7 @@ class ServiceCallbacks(Service):
 class Main(ncs.application.Application):
     def setup(self):
         self.log.info('Main RUNNING')
-        self.register_service('configure-cisco-ftd-servicepoint', ServiceCallbacks)
+        self.register_service('configure-cisco-fmc-servicepoint', ServiceCallbacks)
 
     def teardown(self):
         self.log.info('Main FINISHED')

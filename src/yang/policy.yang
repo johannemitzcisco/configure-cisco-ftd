@@ -1,7 +1,7 @@
-module configure-cisco-ftd {
+module policy {
 
-  namespace "http://example.com/configure-cisco-ftd";
-  prefix configure-cisco-ftd;
+  namespace "http://example.com/policy";
+  prefix policy;
 
   import ietf-inet-types { prefix inet; }
   import tailf-common { prefix tailf; }
@@ -54,21 +54,32 @@ module configure-cisco-ftd {
     }
   }
 
-  list configure-cisco-ftd {
-    description "Configure and FTD device";
-    key device;
-    uses ncs:service-data;
-    ncs:servicepoint configure-cisco-ftd-servicepoint;
+  list policy-service {
+      key service-name;
+      uses ncs:service-data;
+      ncs:servicepoint configure-cisco-fmc-servicepoint;
 
-    leaf device {
-      description "FMC Device";
-      type leafref {
-        path "/ncs:devices/ncs:device/ncs:name";
+      leaf service-name {
+        type string;
+      }
+      list devices {
+        key device;
+        leaf device {
+          type leafref {
+            path "/ncs:devices/ncs:device/ncs:name";
+          }
+          must "deref(.)/../ncs:capability/ncs:uri='http://tail-f.com/ned/cisco-fmc'
+                or deref(.)/../ncs:capability/ncs:uri='http://tail-f.com/ned/cisco-ftd'
+                or deref(.)/../ncs:capability/ncs:uri='http://cisco.com/ned/asa'";
+      }
+      list policy {
+        key name;
+        uses policy-grouping;
       }
     }
+  }
     
-    list policy {
-      key name;
+    grouping policy-grouping {
       leaf name {
         type string;
       }
@@ -94,15 +105,15 @@ module configure-cisco-ftd {
         }
         leaf index {
           type uint32;
-          must "not(.)";
         }
         uses action-grouping {
           when "../type = 'access'";
         }
         leaf-list source-zone {
           when "../../type = 'access'";
+//          type string;
           type leafref {
-            path "deref(../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:securityzones/cisco-fmc:name";
+            path "deref(../../../policy:device)/../ncs:config/cisco-fmc:object/cisco-fmc:securityzones/cisco-fmc:name";
           }
         }
         leaf-list destination-zone {
@@ -165,13 +176,15 @@ module configure-cisco-ftd {
         container source {
           when "../../type = 'nat'  and (../type = 'before-manual' or ../type = 'after-manual')";
           leaf originalSource {
+//            type string;
             type leafref {
-              path "deref(../../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
+              path "deref(../../../../policy:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
             }
           }
           leaf translatedSource {
+//            type string;
             type leafref {
-              path "deref(../../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
+              path "deref(../../../../policy:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
             }
           }
           leaf interfaceIn {
@@ -207,15 +220,17 @@ module configure-cisco-ftd {
           default "false";
         }
         leaf originalNetwork {
+//          type string;
           type leafref {
-            path "deref(../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
+            path "deref(../../../policy:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
           }
           when "../../type = 'nat' 
                and ../type = 'auto'"; 
         }
         leaf translatedNetwork {
+//          type string;
           type leafref {
-            path "deref(../../../configure-cisco-ftd:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
+            path "deref(../../../policy:device)/../ncs:config/cisco-fmc:object/cisco-fmc:networks/cisco-fmc:name";
           }
           when "../../type = 'nat' 
                and ../type = 'auto'"; 
@@ -243,6 +258,5 @@ module configure-cisco-ftd {
         }
       }
     }
-
-  }
+  
 }
